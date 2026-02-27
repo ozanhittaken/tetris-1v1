@@ -46,6 +46,13 @@
                 <h2 class="screen-title">LOBİ</h2>
                 <p class="welcome-text">Hoş geldin, <span id="lobby-username"></span>!</p>
                 <div class="lobby-actions">
+                    <div class="input-group">
+                        <label for="room-mode-select">Oyun Modu</label>
+                        <select id="room-mode-select" class="mode-select">
+                            <option value="classic">Klasik Mod</option>
+                            <option value="speedup">Zamana Karşı Hızlanma</option>
+                        </select>
+                    </div>
                     <button id="create-room-btn" class="btn-primary">ODA OLUŞTUR</button>
                     <div class="divider-or"><span>veya</span></div>
                     <div class="input-group">
@@ -66,6 +73,9 @@
                 <div class="room-code-display">
                     <span class="code-label">Oda Kodu</span>
                     <span class="code-value" id="display-room-code">----</span>
+                </div>
+                <div class="mode-display">
+                    <span class="mode-badge" id="display-room-mode">Klasik Mod</span>
                 </div>
                 <p class="waiting-hint">Bu kodu arkadaşınla paylaş!</p>
                 <div class="spinner"></div>
@@ -89,7 +99,11 @@
                         <span class="my-name" id="game-my-name">Ben</span>
                         <span class="my-score" id="game-my-score">0</span>
                     </div>
-                    <div class="vs-badge">VS</div>
+                    <div class="vs-badge" style="display: flex; flex-direction: column; align-items: center;">
+                        <span>VS</span>
+                        <span id="game-active-mode"
+                            style="font-size: 0.45rem; color: var(--text-secondary); margin-top: 2px;">KLASİK</span>
+                    </div>
                     <div class="opp-info">
                         <span class="opp-name" id="game-opp-name">Rakip</span>
                         <span class="opp-score" id="game-opp-score">0</span>
@@ -156,7 +170,7 @@
                         <span id="result-opp-score">0</span>
                     </div>
                 </div>
-                
+
                 <div class="rematch-section" style="margin-top: 20px;">
                     <button id="rematch-btn" class="btn-primary" style="margin-bottom: 10px;">TEKRAR OYNA</button>
                     <div id="rematch-status" class="rematch-status hidden"></div>

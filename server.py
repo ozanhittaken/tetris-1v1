@@ -9,8 +9,9 @@ from aiohttp import web
 rooms = {}  # code -> Room
 
 class Room:
-    def __init__(self, code, host_ws, host_name):
+    def __init__(self, code, host_ws, host_name, mode='classic'):
         self.code = code
+        self.mode = mode
         self.players = [{'ws': host_ws, 'name': host_name, 'ready': False}]
         self.started = False
         self.rematch_requests = set()
@@ -59,11 +60,12 @@ async def ws_handler(request):
 
             if action == 'create_room':
                 player_name = data.get('name', 'Player')[:20]
+                mode = data.get('mode', 'classic')
                 code = generate_code()
-                room = Room(code, ws, player_name)
+                room = Room(code, ws, player_name, mode)
                 rooms[code] = room
                 player_room = code
-                await ws.send_json({'action': 'room_created', 'code': code, 'name': player_name})
+                await ws.send_json({'action': 'room_created', 'code': code, 'name': player_name, 'mode': mode})
 
             elif action == 'join_room':
                 player_name = data.get('name', 'Player')[:20]
@@ -80,7 +82,7 @@ async def ws_handler(request):
                     continue
                 room.add_player(ws, player_name)
                 player_room = code
-                await ws.send_json({'action': 'room_joined', 'code': code, 'name': player_name})
+                await ws.send_json({'action': 'room_joined', 'code': code, 'name': player_name, 'mode': room.mode})
                 # Notify both players, start countdown
                 host = room.players[0]
                 guest = room.players[1]
@@ -103,7 +105,7 @@ async def ws_handler(request):
                 await asyncio.sleep(0.5)
                 for p in room.players:
                     if not p['ws'].closed:
-                        await p['ws'].send_json({'action': 'game_start', 'seed': seed})
+                        await p['ws'].send_json({'action': 'game_start', 'seed': seed, 'mode': room.mode})
 
             elif action == 'game_update':
                 # Relay board state to opponent
@@ -156,7 +158,7 @@ async def ws_handler(request):
                         seed = random.randint(0, 999999)
                         for p in room.players:
                             if not p['ws'].closed:
-                                await p['ws'].send_json({'action': 'game_start', 'seed': seed})
+                                await p['ws'].send_json({'action': 'game_start', 'seed': seed, 'mode': room.mode})
                     else:
                         # Notify the other player
                         opp = room.get_opponent(ws)

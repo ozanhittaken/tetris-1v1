@@ -62,6 +62,8 @@ class TetrisEngine {
         this.lockTimer = 0; this.lockResets = 0; this.locking = false;
         this.pendingGarbage = 0; this.linesClearedThisTurn = 0;
         this.clearingLines = []; this.clearTimer = 0;
+        this.totalTime = 0;
+        this.mode = 'classic';
         this._fillBag(); this.nextType = this._pull(); this._spawn();
     }
     _fillBag() {
@@ -131,9 +133,20 @@ class TetrisEngine {
         this.pendingGarbage = 0;
     }
     getGhostY() { if (!this.current) return 0; let gy = this.current.y; while (this._canPlace(this.current.shape, this.current.x, gy + 1)) gy++; return gy; }
-    get dropInterval() { return Math.max(50, 1000 - (this.level - 1) * 75); }
+    get dropInterval() {
+        if (this.mode === 'speedup') {
+            // Zamana karşı hızlanma (her saniyede 12ms hızlan)
+            // Minimum düşüş aralığı (maximum hız) 30ms olsun.
+            let elapsedSec = this.totalTime / 1000;
+            return Math.max(30, 1000 - Math.floor(elapsedSec * 12));
+        } else {
+            // Klasik (seviyeye göre hızlanma)
+            return Math.max(50, 1000 - (this.level - 1) * 75);
+        }
+    }
     update(delta) {
         if (this.gameOver) return;
+        this.totalTime += delta;
         if (this.clearingLines.length > 0) { this.clearTimer -= delta; if (this.clearTimer <= 0) this._removeLines(); return; }
         if (!this.current) return;
         this.dropTimer += delta;
@@ -253,7 +266,7 @@ class App {
         this.username = ''; this.ws = null; this.roomCode = '';
         this.engine = null; this.renderer = null; this.oppRenderer = null;
         this.nextCanvas = null; this.running = false; this.lastTime = 0;
-        this.myName = ''; this.oppName = '';
+        this.myName = ''; this.oppName = ''; this.gameMode = 'classic';
         this.dasTimers = {}; this.updateInterval = null;
         this._initDOM(); this._setupInput();
     }
@@ -309,11 +322,14 @@ class App {
         switch (data.action) {
             case 'room_created':
                 this.roomCode = data.code;
+                this.gameMode = data.mode;
                 document.getElementById('display-room-code').textContent = data.code;
+                document.getElementById('display-room-mode').textContent = data.mode === 'speedup' ? 'Zamana Karşı' : 'Klasik Mod';
                 this._showScreen('waiting');
                 break;
             case 'room_joined':
                 this.roomCode = data.code;
+                this.gameMode = data.mode;
                 break;
             case 'error':
                 const err = document.getElementById('lobby-error');
@@ -326,6 +342,7 @@ class App {
                 this._showScreen('countdown');
                 break;
             case 'game_start':
+                if (data.mode) this.gameMode = data.mode;
                 this._startCountdown(data.seed);
                 break;
             case 'opponent_wants_rematch':
@@ -354,7 +371,10 @@ class App {
         }
     }
 
-    _createRoom() { this._send({ action: 'create_room', name: this.username }); }
+    _createRoom() {
+        const mode = document.getElementById('room-mode-select').value;
+        this._send({ action: 'create_room', name: this.username, mode: mode });
+    }
     _joinRoom() {
         const code = document.getElementById('room-code-input').value.trim();
         if (code.length !== 4) {
@@ -402,9 +422,12 @@ class App {
         this._showScreen('game');
         document.getElementById('game-my-name').textContent = this.myName;
         document.getElementById('game-opp-name').textContent = this.oppName;
+        document.getElementById('game-active-mode').textContent = this.gameMode === 'speedup' ? 'HIZLI' : 'KLASİK';
 
         const rng = new SeededRNG(seed);
         this.engine = new TetrisEngine(rng);
+        this.engine.mode = this.gameMode;
+
         const boardCanvas = document.getElementById('my-board');
         const nextCanvas = document.getElementById('my-next');
         this.nextCanvas = nextCanvas;

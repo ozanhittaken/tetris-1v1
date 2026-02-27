@@ -213,6 +213,44 @@ body {
     color: rgba(200, 200, 255, 0.25);
 }
 
+.mode-select {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    background: rgba(15, 15, 40, 0.8);
+    border: 1.5px solid var(--panel-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    outline: none;
+    transition: border-color 0.3s;
+    text-align: center;
+    letter-spacing: 0.10em;
+    appearance: none;
+    cursor: pointer;
+}
+
+.mode-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.mode-display {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.mode-badge {
+    background: rgba(0, 245, 255, 0.15);
+    border: 1px solid rgba(0, 245, 255, 0.3);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+}
+
 /* ===== BUTTONS ===== */
 .btn-primary,
 .btn-secondary {
@@ -643,8 +681,16 @@ body {
 }
 
 @keyframes textPulse {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; text-shadow: 0 0 10px var(--accent-glow); }
+
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+        text-shadow: 0 0 10px var(--accent-glow);
+    }
 }
 
 .result-score-box {
