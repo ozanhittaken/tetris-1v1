@@ -274,6 +274,7 @@ class App {
         document.getElementById('join-room-btn').addEventListener('click', () => this._joinRoom());
         document.getElementById('room-code-input').addEventListener('keydown', e => { if (e.key === 'Enter') this._joinRoom(); });
         document.getElementById('back-lobby-btn').addEventListener('click', () => this._backToLobby());
+        document.getElementById('rematch-btn').addEventListener('click', () => this._requestRematch());
     }
 
     _showScreen(name) {
@@ -327,6 +328,11 @@ class App {
             case 'game_start':
                 this._startCountdown(data.seed);
                 break;
+            case 'opponent_wants_rematch':
+                const rs = document.getElementById('rematch-status');
+                rs.textContent = 'Rakip tekrar oynamak istiyor!';
+                rs.classList.remove('hidden');
+                break;
             case 'opponent_update':
                 if (this.oppRenderer) {
                     this.oppRenderer.setData(data.board, data.current);
@@ -366,6 +372,15 @@ class App {
         if (this.ws) this.ws.close();
         this._showScreen('lobby');
         setTimeout(() => this._connectWS(), 300);
+    }
+
+    _requestRematch() {
+        const btn = document.getElementById('rematch-btn');
+        const st = document.getElementById('rematch-status');
+        btn.classList.add('hidden');
+        st.textContent = "Rakip bekleniyor...";
+        st.classList.remove('hidden');
+        this._send({ action: 'request_rematch' });
     }
 
     // ---- COUNTDOWN ----
@@ -458,6 +473,12 @@ class App {
         document.getElementById('result-opp-label').textContent = this.oppName;
         document.getElementById('result-my-score').textContent = this.engine ? this.engine.score : 0;
         document.getElementById('result-opp-score').textContent = document.getElementById('game-opp-score').textContent || '0';
+
+        // Reset rematch UI state
+        document.getElementById('rematch-btn').classList.remove('hidden');
+        document.getElementById('rematch-status').classList.add('hidden');
+        document.getElementById('rematch-status').textContent = '';
+
         this._showScreen('gameover');
     }
 

@@ -626,6 +626,27 @@ body {
     margin-bottom: 1.5rem;
 }
 
+/* ===== REMATCH SECTION ===== */
+.rematch-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rematch-status {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    color: var(--accent);
+    animation: textPulse 1.5s ease-in-out infinite;
+    min-height: 1.2rem;
+}
+
+@keyframes textPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; text-shadow: 0 0 10px var(--accent-glow); }
+}
+
 .result-score-box {
     display: flex;
     flex-direction: column;

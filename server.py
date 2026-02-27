@@ -13,6 +13,7 @@ class Room:
         self.code = code
         self.players = [{'ws': host_ws, 'name': host_name, 'ready': False}]
         self.started = False
+        self.rematch_requests = set()
 
     @property
     def is_full(self):
@@ -143,6 +144,24 @@ async def ws_handler(request):
                         'action': 'you_lost',
                         'winner': opp['name'] if opp else 'Rakip'
                     })
+
+            elif action == 'request_rematch':
+                if player_room and player_room in rooms:
+                    room = rooms[player_room]
+                    room.rematch_requests.add(ws)
+                    
+                    if len(room.rematch_requests) == 2:
+                        # Both players want to rematch, start the game
+                        room.rematch_requests.clear()
+                        seed = random.randint(0, 999999)
+                        for p in room.players:
+                            if not p['ws'].closed:
+                                await p['ws'].send_json({'action': 'game_start', 'seed': seed})
+                    else:
+                        # Notify the other player
+                        opp = room.get_opponent(ws)
+                        if opp and not opp['ws'].closed:
+                            await opp['ws'].send_json({'action': 'opponent_wants_rematch'})
 
     except Exception as e:
         print(f"WS error: {e}")
