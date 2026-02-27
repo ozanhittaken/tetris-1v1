@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tetris Battle — 1v1</title>
+    <meta name="description" content="1 vs 1 Tetris Battle. Ayrı telefonlardan oynanan çok oyunculu Tetris.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="app">
+
+        <!-- 1. USERNAME SCREEN -->
+        <div id="username-screen" class="screen active">
+            <div class="bg-shapes">
+                <div class="bg-piece piece-1"></div>
+                <div class="bg-piece piece-2"></div>
+                <div class="bg-piece piece-3"></div>
+                <div class="bg-piece piece-4"></div>
+            </div>
+            <div class="screen-content">
+                <h1 class="game-title">TETRIS<br><span>BATTLE</span></h1>
+                <p class="subtitle">1 VS 1</p>
+                <div class="input-group">
+                    <label for="username-input">Kullanıcı Adı</label>
+                    <input type="text" id="username-input" maxlength="20" placeholder="Adını gir..." autocomplete="off">
+                </div>
+                <button id="to-lobby-btn" class="btn-primary">DEVAM ET</button>
+            </div>
+        </div>
+
+        <!-- 2. LOBBY SCREEN -->
+        <div id="lobby-screen" class="screen">
+            <div class="bg-shapes">
+                <div class="bg-piece piece-1"></div>
+                <div class="bg-piece piece-2"></div>
+            </div>
+            <div class="screen-content">
+                <h2 class="screen-title">LOBİ</h2>
+                <p class="welcome-text">Hoş geldin, <span id="lobby-username"></span>!</p>
+                <div class="lobby-actions">
+                    <button id="create-room-btn" class="btn-primary">ODA OLUŞTUR</button>
+                    <div class="divider-or"><span>veya</span></div>
+                    <div class="input-group">
+                        <label for="room-code-input">Oda Kodu</label>
+                        <input type="text" id="room-code-input" maxlength="4" placeholder="4 haneli kod"
+                            autocomplete="off" inputmode="numeric">
+                    </div>
+                    <button id="join-room-btn" class="btn-secondary">ODAYA KATIL</button>
+                </div>
+                <div id="lobby-error" class="error-msg hidden"></div>
+            </div>
+        </div>
+
+        <!-- 3. WAITING SCREEN -->
+        <div id="waiting-screen" class="screen">
+            <div class="screen-content">
+                <h2 class="screen-title">RAKİP BEKLENİYOR</h2>
+                <div class="room-code-display">
+                    <span class="code-label">Oda Kodu</span>
+                    <span class="code-value" id="display-room-code">----</span>
+                </div>
+                <p class="waiting-hint">Bu kodu arkadaşınla paylaş!</p>
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <!-- 4. COUNTDOWN SCREEN -->
+        <div id="countdown-screen" class="screen">
+            <div class="screen-content">
+                <div class="countdown-opponent">vs <span id="countdown-opponent-name">Rakip</span></div>
+                <div class="countdown-number" id="countdown-number">3</div>
+            </div>
+        </div>
+
+        <!-- 5. GAME SCREEN -->
+        <div id="game-screen" class="screen">
+            <div class="game-layout">
+                <!-- Top Bar -->
+                <div class="top-bar">
+                    <div class="my-info">
+                        <span class="my-name" id="game-my-name">Ben</span>
+                        <span class="my-score" id="game-my-score">0</span>
+                    </div>
+                    <div class="vs-badge">VS</div>
+                    <div class="opp-info">
+                        <span class="opp-name" id="game-opp-name">Rakip</span>
+                        <span class="opp-score" id="game-opp-score">0</span>
+                    </div>
+                </div>
+
+                <!-- Game Area -->
+                <div class="game-area">
+                    <!-- My Board -->
+                    <div class="my-board-section">
+                        <div class="board-wrapper my-border">
+                            <canvas id="my-board"></canvas>
+                        </div>
+                        <div class="side-info">
+                            <div class="info-box">
+                                <span class="info-label">NEXT</span>
+                                <canvas id="my-next" width="80" height="80"></canvas>
+                            </div>
+                            <div class="info-box">
+                                <span class="info-label">LV</span>
+                                <span class="info-value" id="my-level">1</span>
+                            </div>
+                            <div class="info-box">
+                                <span class="info-label">LN</span>
+                                <span class="info-value" id="my-lines">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Opponent Mini Board -->
+                    <div class="opp-mini-section">
+                        <div class="mini-board-wrapper opp-border">
+                            <canvas id="opp-board"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Touch Controls -->
+                <div class="touch-controls">
+                    <div class="touch-row">
+                        <button class="touch-btn" data-action="left" id="btn-left">◀</button>
+                        <button class="touch-btn" data-action="down" id="btn-down">▼</button>
+                        <button class="touch-btn" data-action="right" id="btn-right">▶</button>
+                    </div>
+                    <div class="touch-row">
+                        <button class="touch-btn rotate-btn" data-action="rotateCCW" id="btn-rccw">↺</button>
+                        <button class="touch-btn drop-btn" data-action="hardDrop" id="btn-drop">⏬</button>
+                        <button class="touch-btn rotate-btn" data-action="rotateCW" id="btn-rcw">↻</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. GAME OVER OVERLAY -->
+        <div id="game-over-screen" class="screen">
+            <div class="screen-content">
+                <h2 id="result-text" class="result-win">KAZANDIN!</h2>
+                <div id="result-scores" class="result-scores">
+                    <div class="result-score-box">
+                        <span id="result-my-label">Ben</span>
+                        <span id="result-my-score">0</span>
+                    </div>
+                    <div class="result-score-box">
+                        <span id="result-opp-label">Rakip</span>
+                        <span id="result-opp-score">0</span>
+                    </div>
+                </div>
+                <button id="back-lobby-btn" class="btn-primary">LOBİYE DÖN</button>
+            </div>
+        </div>
+
+    </div>
+    <script src="game.js"></script>
+</body>
+
+</html>
